@@ -111,3 +111,15 @@ To change the Amazon Machine Images: [Ubuntu Cloud Images](https://cloud-images.
 ### SMTP setup:
 
 [credentials](https://github.com/comerford/tf-aws-gitlab/blob/master/conf/gitlab.rb#L290) and [region](https://github.com/comerford/tf-aws-gitlab/blob/master/conf/gitlab.rb#L288) settings in gitlab.rb (will start, but mail won't work)
+
+## Clean Up:
+
+```
+aws s3 rm --recursive s3://honestbee-gitlab/ELBAccessLogs/
+```
+
+```
+terraform plan -destroy
+terraform destroy
+```
+
