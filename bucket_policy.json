@@ -6,10 +6,10 @@
 			"Sid": "Stmt1453149322558",
 			"Effect": "Allow",
 			"Principal": {
-				"AWS": "arn:aws:iam::797873946194:root"
+				"AWS": "114774131450"
 			},
 			"Action": "s3:PutObject",
-			"Resource": "arn:aws:s3:::gitlab-example-com/ELBAccessLogs/AWSLogs/123456789012/*"
+			"Resource": "arn:aws:s3:::honestbee-gitlab/ELBAccessLogs/AWSLogs/517285003183/*"
 		}
 	]
 }

@@ -57,6 +57,3 @@ variable "elb_subnet" {
 variable "elb_whitelist" {
     default = "198.51.100.0/24,203.0.113.0/24"
 }
-variable "bucket_name" {
-    default = "gitlab-example-com"
-}

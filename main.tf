@@ -50,7 +50,6 @@ resource "aws_instance" "gitlab_host" {
       "sudo bash /home/ubuntu/conf/script.deb.sh",
       "sudo apt-get -y install gitlab-ce",
       "sudo cp ~/conf/gitlab.rb /etc/gitlab/gitlab.rb",
-      "sudo cp ~/conf/gitlab_example_com.* /etc/gitlab/ssl/"
       "sudo gitlab-ctl reconfigure"
     ]
   }
@@ -66,25 +65,25 @@ resource "aws_security_group" "gitlab_host_SG" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["192.0.2.0/24"]
+    cidr_blocks = ["0.0.0.0/0"]
     self = true
   }
-  # HTTP access from Internal IPs and this SG
+  # HTTP access from VPC and this SG
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["192.0.2.0/24"]
+    cidr_blocks = ["172.31.0.0/16"]
     self        = true
   }
   # HTTPS access from Internal IPs and this SG
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["192.0.2.0/24"]
-    self        = true
-  }
+  # ingress {
+  #   from_port   = 443
+  #   to_port     = 443
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["172.31.0.0/16"]
+  #   self        = true
+  # }
   # next few rules allow access from the ELB SG
   # can't mix CIDR and SGs, so repeating a lot of the above
 
@@ -94,12 +93,12 @@ resource "aws_security_group" "gitlab_host_SG" {
     protocol = "tcp"
     security_groups = ["${aws_security_group.gitlab_ELB_SG.id}"]
   }
-  ingress {
-    from_port = 443
-    to_port = 443
-    protocol = "tcp"
-    security_groups = ["${aws_security_group.gitlab_ELB_SG.id}"]
-  }
+  # ingress {
+  #   from_port = 443
+  #   to_port = 443
+  #   protocol = "tcp"
+  #   security_groups = ["${aws_security_group.gitlab_ELB_SG.id}"]
+  # }
   # outbound internet access
   egress {
     from_port   = 0
@@ -126,6 +125,13 @@ resource "aws_security_group" "gitlab_ELB_SG" {
   ingress {
     from_port   = 443
     to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["${split(",", var.elb_whitelist)}"]
+  }
+  # SSH access from the whitelist
+  ingress {
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["${split(",", var.elb_whitelist)}"]
   }
@@ -160,18 +166,27 @@ resource "aws_elb" "gitlab-elb" {
   }
 # Listen on SSL
   listener {
-    instance_port = 443
-    instance_protocol = "https"
+    instance_port = 80
+    instance_protocol = "http"
     lb_port = 443
     lb_protocol = "https"
     ssl_certificate_id = "${var.elb_ssl_cert}"
   }
 
+# Listen on SSH (git push)
+  listener {
+    instance_port = 22
+    instance_protocol = "tcp"
+    lb_port = 22
+    lb_protocol = "tcp"
+  }
+
+
   health_check {
     healthy_threshold = 2
     unhealthy_threshold = 2
     timeout = 3
-    target = "TCP:443"
+    target = "HTTP:80/explore"
     interval = 30
   }
 
@@ -186,9 +201,10 @@ resource "aws_elb" "gitlab-elb" {
     Owner = "${var.tag_Owner}"
   }
 }
+
 # now an S3 bucket to store our ELB access logs
 # see http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/enable-access-logs.html
-resource "aws_s3_bucket" "gitlab-example-com" {
+resource "aws_s3_bucket" "gitlab" {
     bucket = "${var.bucket_name}"
     acl = "private"
     policy = "${file("bucket_policy.json")}"
