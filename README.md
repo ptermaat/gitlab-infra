@@ -15,15 +15,15 @@ Steps to provision:
    Existing AWS Resources
    ```
    # List existing VPC, IsDefault, CidrBlock  and Subnets
-   ec2 describe-vpcs --query "Vpcs[].[VpcId,IsDefault,CidrBlock]" --output=table
-   ec2 describe-subnets --filters "Name=vpc-id,Values=<vpc-id>"
-   # List existing TLS Certs
-   iam list-server-certificates --query "ServerCertificateMetadataList[].[ServerCertificateName,Arn]" --output=table
+   aws ec2 describe-vpcs --query "Vpcs[].[VpcId,IsDefault,CidrBlock]" --output=table
+   aws ec2 describe-subnets --filters "Name=vpc-id,Values=vpc-3d2eda58" --query "Subnets[].[SubnetId,AvailabilityZone,MapPublicIpOnLaunch,CidrBlock]" --output=table   # List existing TLS Certs
+   aws iam list-server-certificates --query "ServerCertificateMetadataList[].[ServerCertificateName,Arn]" --output=table
    # Add your ip to white list:
    curl ifconfig.co
    ```
 
-   Review the gitlab_host_SG cidr block in main.tf 
+   Review the `gitlab_host_SG` cidr block in `main.tf`
+
    (Todo: add variable for vpc cidr block..)
 
 2. set environment variables
@@ -38,34 +38,43 @@ Steps to provision:
    # Get 12 Digit Acount ID
    iam get-user --output text --query='User.Arn' | grep -Eo '[[:digit:]]{12}'
    ```
-4. Add domains to route53 hosted zone as CNAME for gitlab-elb
 
-Create stack:
 
-```
-terraform plan
-```
+4. Create stack:
+   
+   ```
+   terraform plan
+   ```
+   
+   ```
+   terraform apply
+   ```
+   
+   Output should provide name of provisioned ELB. Create Route53 CNAME records matching the domains listed in `conf/gitlab.rb`.
+  
 
-```
-terraform apply
-```
+5. Wait for Gitlab instance to report as Healthy and register with ELB:
 
-```
-while true;do aws elb describe-instance-health --load-balancer-name gitlab-elb --query "InstanceStates[].State" --output=text;sleep 1; done
-```
+   ```
+   while true;do aws elb describe-instance-health --load-balancer-name gitlab-elb --query "InstanceStates[].State" --output=text;sleep 1; done
+   ```
 
-```
-pbcopy < ~/.ssh/rsa_id.pub
-```
 
-```
-open http://gitlab.honestbee.com
-```
+6. Do Gitlab configuration
 
-1. Set Password
-2. Change Account Name
-3. Add public key
-4. Disable User Registration
+   
+   ```
+   pbcopy < ~/.ssh/rsa_id.pub
+   ```
+   
+   ```
+   open http://gitlab.honestbee.com
+   ```
+   
+   1. Set Password
+   2. Change Account Name
+   3. Add public key
+   4. Disable User Registration
 
 ### Gitlab Registry
 
