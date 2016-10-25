@@ -1,7 +1,4 @@
 #!/bin/bash
-# this script comes from:
-# https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh
-# not comfortable just piping random URLs into bash, so made a local copy
 
 unknown_os ()
 {
@@ -107,6 +104,7 @@ main ()
   echo "done."
 
 
+  gpg_key_url="https://packages.gitlab.com/gitlab/gitlab-ce/gpgkey"
   apt_config_url="https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/config_file.list?os=${os}&dist=${dist}&source=script"
 
   apt_source_path="/etc/apt/sources.list.d/gitlab_gitlab-ce.list"
@@ -159,7 +157,7 @@ main ()
 
   echo -n "Importing packagecloud gpg key... "
   # import the gpg key
-  curl https://packages.gitlab.com/gpg.key 2> /dev/null | apt-key add - &>/dev/null
+  curl -L "${gpg_key_url}" 2> /dev/null | apt-key add - &>/dev/null
   echo "done."
 
   echo -n "Running apt-get update... "
@@ -172,3 +170,4 @@ main ()
 }
 
 main
+
