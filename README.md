@@ -40,7 +40,47 @@ Steps to provision:
    ```
 4. Add domains to route53 hosted zone as CNAME for gitlab-elb
 
+Create stack:
 
+```
+terraform plan
+```
+
+```
+terraform apply
+```
+
+```
+while true;do aws elb describe-instance-health --load-balancer-name gitlab-elb --query "InstanceStates[].State" --output=text;sleep 1; done
+```
+
+```
+pbcopy < ~/.ssh/rsa_id.pub
+```
+
+```
+open http://gitlab.honestbee.com
+```
+
+1. Set Password
+2. Change Account Name
+3. Add public key
+4. Disable User Registration
+
+### Gitlab Registry
+
+Once a Repository has been created, docker images can be pushed to it:
+
+```
+docker login glr.honestbee.com
+Username: <gitlab username>
+Password: <gitlab password>
+```
+
+```
+docker tag ... 
+docker push
+```
 
 ## Optional:
 
