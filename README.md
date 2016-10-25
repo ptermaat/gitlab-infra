@@ -22,6 +22,11 @@ Steps to provision:
    curl ifconfig.co
    ```
 
+   You may need to decrypt your private key for Terraform to use it:
+   ```
+   openssl rsa -in ~/.ssh/id_rsa  -out ~/.ssh/id_rsa-decrypted
+   ```
+
    Review the `gitlab_host_SG` cidr block in `main.tf`
 
    (Todo: add variable for vpc cidr block..)
@@ -51,6 +56,12 @@ Steps to provision:
    ```
    
    Output should provide name of provisioned ELB. Create Route53 CNAME records matching the domains listed in `conf/gitlab.rb`.
+
+   ```
+   aws route53 list-hosted-zones-by-name --query "HostedZones[].[Name,Id]" --output table
+   aws route53 list-resource-record-sets --hosted-zone-id <zone-id> \
+     --query "ResourceRecordSets[?Type != 'TXT'].[Type,Name,AliasTarget.DNSName || ResourceRecords[0].Value]"  --output table
+   ```
   
 
 5. Wait for Gitlab instance to report as Healthy and register with ELB:
