@@ -37,7 +37,7 @@ Steps to provision:
    export TF_VAR_aws_secret_key=x823dzzawer...
    ```
 
-3. Edit `bucket_policy.json`, follow [AWS steps](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/enable-access- logs.html#attach-bucket-policy)
+3. Edit `bucket_policy.json`, follow [AWS steps](http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/enable-access-logs.html#attach-bucket-policy)
    update principal and account id:
    ```
    # Get 12 Digit Acount ID
@@ -86,6 +86,11 @@ Steps to provision:
    2. Change Account Name
    3. Add public key
    4. Disable User Registration
+
+Note: If you need to change ssh key:
+```
+ssh-keygen -R "gitlab.honestbee.com"
+```
 
 ### Gitlab Registry
 
