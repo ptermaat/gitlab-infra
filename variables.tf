@@ -4,22 +4,18 @@
 # Variables need to be defined even though they are loaded from
 # terraform.tfvars - see https://github.com/hashicorp/terraform/issues/2659
 
-# Ubuntu 16.04 LTS AMIs (HVM:instancestore) will be used
+# Ubuntu 16.04 LTS AMIs (HVM:ebs) will be used
+# aws ec2 describe-images --owners 099720109477 --filters "Name=name,Values=*hvm*ssd*-16.04*"
+# http://docs.aws.amazon.com/cli/latest/reference/ec2/describe-images.html
+data "aws_ami" "ubuntu" {
+  most_recent = true
 
-variable "amazon_amis" {
-  default = {
-    ap-northeast-1 = "ami-839b3de2"
-    ap-southeast-1 = "ami-7a288e19"
-    ap-southeast-2 = "ami-dc3a07bf"
-    cn-north-1 = "ami-5af22637"
-    eu-central-1 = "ami-1279807d"
-    eu-west-1 = "ami-d17836a2"
-    sa-east-1 = "ami-d439a4b8"
-    us-east-1 = "ami-3fabf828"
-    us-gov-west-1 = "ami-69d66e08"
-    us-west-1 = "ami-ff175c9f"
-    us-west-2 = "ami-fbd5719b"
+  filter {
+    name   = "name"
+    values = ["*hvm-ssd*-16.04*"]
   }
+
+  owners = ["099720109477"] # Canonical
 }
 
 variable "tag_Owner" {
@@ -56,4 +52,31 @@ variable "elb_subnet" {
 }
 variable "elb_whitelist" {
     default = "198.51.100.0/24,203.0.113.0/24"
+}
+variable "external_url" {
+    default = "gitlab.example.com"
+}
+variable "registry_external_url" {
+    default =  "https://registry.example.com"
+}
+variable "smtp_user" {
+    default =  "admin@example.com"
+}
+variable "smtp_password" {
+    default =  "mysupersecret"
+}
+variable "smtp_host" {
+    default =  "smtp.mandrillapp.com"
+}
+variable "smtp_port" {
+    default =  587
+}
+variable "smtp_from_email" {
+    default =  "gitlab@example.com"
+}
+variable "smtp_email_display_name" {
+    default =  "Example Gitlab"
+}
+variable "smtp_email_reply_to" {
+    default =  "noreply@example.com"
 }

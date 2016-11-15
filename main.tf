@@ -1,26 +1,44 @@
-resource "aws_instance" "gitlab_host" {
-  # The connection block tells our provisioner how to
-  # communicate with the resource (instance)
-  connection {
-    # The default username for our AMI
-    user = "ubuntu"
-    # this should be the equivalent private key used in key_name below
-    # and allow you to connect to the hosts once they are spun up
-    private_key = "${file(var.private_key_path)}"
+data "template_file" "cloud-config" {
+  template = "${file("files/gitlab/cloud-config.tpl")}"
+
+  vars {
+    external_url            = "${var.external_url}"
+    registry_external_url   = "${var.registry_external_url}"
+    smtp_user               = "${var.smtp_user}"
+    smtp_password           = "${var.smtp_password}"
+    smtp_host               = "${var.smtp_host}"
+    smtp_port               = "${var.smtp_port}"
+    smtp_from_email         = "${var.smtp_from_email}"
+    smtp_email_display_name = "${var.smtp_email_display_name}"
+    smtp_email_reply_to     = "${var.smtp_email_reply_to}"
+  }
+}
+
+# Render a multi-part cloudinit config
+data "template_cloudinit_config" "config" {
+  gzip          = false
+  base64_encode = false
+
+  part {
+    content_type = "text/cloud-config"
+    content      = "${data.template_file.cloud-config.rendered}"
   }
 
+  part {
+    content_type = "text/x-shellscript"
+    content      = "${file("files/gitlab/script.deb.sh")}"
+  }
+}
+
+resource "aws_instance" "gitlab_host" {
   instance_type = "${var.instance_size}"
-
-  # Recent Bitnami AMI in the region
-  ami = "${lookup(var.amazon_amis, var.aws_region)}"
-
+  user_data     = "${data.template_cloudinit_config.config.rendered}"
+  ami           = "${data.aws_ami.ubuntu.id}"
   # The name of our SSH keypair
-  key_name = "${var.host_key_name}"
-
+  key_name      = "${var.host_key_name}"
   # Our Security group to allow HTTP and SSH access
   vpc_security_group_ids = ["${aws_security_group.gitlab_host_SG.id}"]
 
-  #
   subnet_id = "${var.host_subnet}"
   associate_public_ip_address = false
   # set the relevant tags
@@ -28,32 +46,8 @@ resource "aws_instance" "gitlab_host" {
     Name = "gitlab_host"
     Owner = "${var.tag_Owner}"
   }
-  # We run a remote provisioner on the instance after creating it
-  # This is simple so is OK in terraform, but would be more appropriate
-  # in a proper config management tool like chef/puppet/etc.
-  provisioner "remote-exec" {
-    inline = [
-        "mkdir -p ~/conf"
-    ]
-  }
-  provisioner "file" {
-        source = "conf/"
-        destination = "~/conf"
-  }
-  # Installation instructions snaffled from https://about.gitlab.com/downloads/#ubuntu1404
-  # Note that the SSL cert/key files are empty in the repo intentionally
-  # for this to work, and start gitlab, the key must be present and correct
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt-get update",
-      "sudo apt-get -y upgrade",
-      "sudo bash /home/ubuntu/conf/script.deb.sh",
-      "sudo apt-get -y install gitlab-ce",
-      "sudo cp ~/conf/gitlab.rb /etc/gitlab/gitlab.rb",
-      "sudo gitlab-ctl reconfigure"
-    ]
-  }
 }
+
 # host security group, no external access - that will be on the ELB SG
 resource "aws_security_group" "gitlab_host_SG" {
   name        = "gitlab_host"
@@ -150,21 +144,21 @@ resource "aws_elb" "gitlab-elb" {
   subnets = ["${var.elb_subnet}"]
   #
   security_groups = ["${aws_security_group.gitlab_ELB_SG.id}"]
-# this requires a valid bucket policy for the ELB to write to the bucket
-# http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/enable-access-logs.html#attach-bucket-policy
+  # this requires a valid bucket policy for the ELB to write to the bucket
+  # http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/enable-access-logs.html#attach-bucket-policy
   access_logs {
     bucket = "${var.bucket_name}"
     bucket_prefix = "ELBAccessLogs"
     interval = 60
   }
-# Listen on HTTP
+  # Listen on HTTP
   listener {
     instance_port = 80
     instance_protocol = "http"
     lb_port = 80
     lb_protocol = "http"
   }
-# Listen on SSL
+  # Listen on SSL
   listener {
     instance_port = 80
     instance_protocol = "http"
@@ -173,7 +167,7 @@ resource "aws_elb" "gitlab-elb" {
     ssl_certificate_id = "${var.elb_ssl_cert}"
   }
 
-# Listen on SSH (git push)
+  # Listen on SSH (git push)
   listener {
     instance_port = 22
     instance_protocol = "tcp"

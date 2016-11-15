@@ -169,5 +169,12 @@ main ()
   echo "The repository is setup! You can now install packages."
 }
 
+# Set up gitlab repository
 main
 
+# install gitlab-ce
+apt-get -y install gitlab-ce
+
+# gitlab-ctl reconfigure
+echo "script.deb.sh reconfig would run now, contents of config is:"
+cat /etc/gitlab/gitlab.rb
