@@ -37,3 +37,14 @@ bucket_name = "gitlab-example-com"
 
 # Whitelist for the ELB, should you require one
 elb_whitelist = "198.51.100.0/24,203.0.113.0/24"
+
+# gitlab.rb template vars:
+external_url            = "https://gitlab.example.com"
+registry_external_url   = "https://glr.example.com"
+smtp_user               = "mandril_user"
+smtp_password           = "mandril_password"
+smtp_host               = "smtp.mandrillapp.com"
+smtp_port               = 587
+smtp_from_email         = "gitlab@example.com"
+smtp_email_display_name = "Example Gitlab"
+smtp_email_reply_to     = "noreply@example.com"
