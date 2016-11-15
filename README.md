@@ -46,15 +46,15 @@ Steps to provision:
 
 
 4. Create stack:
-   
+
    ```
    terraform plan
    ```
-   
+
    ```
    terraform apply
    ```
-   
+
    Output should provide name of provisioned ELB. Create Route53 CNAME records matching the domains listed in `conf/gitlab.rb`.
 
    ```
@@ -62,7 +62,7 @@ Steps to provision:
    aws route53 list-resource-record-sets --hosted-zone-id <zone-id> \
      --query "ResourceRecordSets[?Type != 'TXT'].[Type,Name,AliasTarget.DNSName || ResourceRecords[0].Value]"  --output table
    ```
-  
+
 
 5. Wait for Gitlab instance to report as Healthy and register with ELB:
 
@@ -73,15 +73,15 @@ Steps to provision:
 
 6. Do Gitlab configuration
 
-   
+
    ```
    pbcopy < ~/.ssh/rsa_id.pub
    ```
-   
+
    ```
    open http://gitlab.honestbee.com
    ```
-   
+
    1. Set Password
    2. Change Account Name
    3. Add public key
@@ -103,7 +103,7 @@ Password: <gitlab password>
 ```
 
 ```
-docker tag ... 
+docker tag ...
 docker push
 ```
 
