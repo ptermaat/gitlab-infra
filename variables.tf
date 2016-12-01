@@ -26,38 +26,47 @@ variable "aws_region" {
     default = "us-west-2"
 }
 
-variable "account_vpc" {
-    default = "vpc-11111111"
-}
 variable "host_key_name" {
     default = "host_keypair"
 }
 variable "private_key_path" {
     default = "~/.ssh/keypair.pem"
 }
+# GitLab host
 variable "instance_size" {
-    default = "m3.medium"
+    default = "m4.medium"
+}
+# Runner scheduling jobs and managing builders
+variable "instance_size_runner" {
+    default = "t2.medium"
+}
+# Size of instances provisioned by the runner
+variable "instance_size_builder" {
+    default = "c3.large"
 }
 variable "elb_ssl_cert" {
     default = "arn:aws:iam::111111111111:server-certificate/gitlab.example.com"
 }
-variable "host_subnet" {
-    default = "subnet-FFFFFFFF"
-}
 variable "bucket_name" {
     default = "mybucket"
 }
-variable "elb_subnet" {
-    default = "subnet-EEEEEEEE"
+variable "bucket_name_registry" {
+    default = "myregistrybucket"
+}
+variable "bucket_name_cache" {
+    default = "mycachebucket"
 }
 variable "elb_whitelist" {
     default = "198.51.100.0/24,203.0.113.0/24"
 }
 variable "external_url" {
-    default = "gitlab.example.com"
+    default = "https://gitlab.example.com"
 }
 variable "registry_external_url" {
     default =  "https://registry.example.com"
+}
+variable "gitlab_root_password" {
+    default = "5iveL!fe"
 }
 variable "smtp_user" {
     default =  "admin@example.com"

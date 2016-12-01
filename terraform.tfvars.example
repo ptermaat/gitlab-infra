@@ -8,9 +8,6 @@ aws_region = "us-west-2"
 
 tag_Owner = "teamname@example.com"
 
-# Set to the VPC for the region
-account_vpc = "vpc-12345678"
-
 # the host key is not created by this config, hence should already exist
 host_key_name = "host-key-name"
 
@@ -24,16 +21,10 @@ instance_size = "c3.large"
 # SSL cert for ELB
 elb_ssl_cert = "arn:aws:iam::123456789012:server-certificate/gitlab-team.example.com"
 
-# Subnet to put the host in
-# Multiple subnets would just require a comma separated list and a split in main.tf
-host_subnet = "subnet-12345678"
-
-# Subnet to put the ELB
-# Multiple subnets would just require a comma separated list and a split in main.tf
-elb_subnet = "subnet-87654321"
-
-# Name for S3 bucket (for logs)
+# Name for S3 buckets
 bucket_name = "gitlab-example-com"
+bucket_name_registry = "gitlab-registry-example-com"
+bucket_name_cache = "gitlab-cache-example-com"
 
 # Whitelist for the ELB, should you require one
 elb_whitelist = "198.51.100.0/24,203.0.113.0/24"
@@ -41,6 +32,7 @@ elb_whitelist = "198.51.100.0/24,203.0.113.0/24"
 # gitlab.rb template vars:
 external_url            = "https://gitlab.example.com"
 registry_external_url   = "https://glr.example.com"
+gitlab_root_password    = "SuperSecretPassword123"
 smtp_user               = "mandril_user"
 smtp_password           = "mandril_password"
 smtp_host               = "smtp.mandrillapp.com"

@@ -22,6 +22,13 @@ write_files:
       ## https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/doc/settings/configuration.md#configuring-the-external-url-for-gitlab
       external_url '${external_url}'
 
+      ###############################
+      # GitLab application settings #
+      ###############################
+
+      # Set the initial default admin password.
+      gitlab_rails['initial_root_password'] = "${gitlab_root_password}"
+
       ############################
       # gitlab.yml configuration #
       ############################
@@ -54,6 +61,16 @@ write_files:
 
       ## Settings used by GitLab application
       gitlab_rails['registry_enabled'] = true
+      ## Settings used by GitLab application
+      gitlab_rails['registry_enabled'] = true
+      # registry['storage'] = {
+      #   's3' => {
+      #     'accesskey' => 'ADD-KEY-HERE',
+      #     'secretkey' => 'ADD-SECRET-HERE',
+      #     'bucket' => '${bucket_name_registry}',
+      #     'region' => '${aws_region}'
+      #   }
+      # }
 
       ################
       # GitLab Nginx #
