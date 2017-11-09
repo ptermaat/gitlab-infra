@@ -39,7 +39,7 @@ All actual values have been generalized, or gitignored.
    update principal and account id:
    ```
    # Get 12 Digit Acount ID
-   iam get-user --output text --query='User.Arn' | grep -Eo '[[:digit:]]{12}'
+   aws iam get-user --output text --query='User.Arn' | grep -Eo '[[:digit:]]{12}'
    ```
 
 
